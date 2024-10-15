@@ -1,20 +1,19 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 )
 
 type Config struct {
-	Host          string `json:"host"`
-	Port          string `json:"port"`
-	User          string `json:"user"`
-	Password      string `json:"password"`
-	Database      string `json:"database"`
-	RedisHost     string `json:"redis_host"`
-	RedisPassword string `json:"redis_password"`
+	Host          string
+	Port          string
+	User          string
+	Password      string
+	Database      string
+	RedisHost     string
+	RedisPassword string
 }
 
 var conf *Config
@@ -24,7 +23,6 @@ func GetConfig() *Config {
 		return conf
 	}
 
-	// ... get configuration (from env vars or config file)
 	conf = &Config{}
 
 	configContent, err := os.ReadFile(".env")
@@ -36,39 +34,35 @@ func GetConfig() *Config {
 	envMap := make(map[string]string)
 	for _, variable := range envVariables {
 		if strings.Contains(variable, "=") {
-			splitVariable := strings.Split(variable, "=")
-			envMap[splitVariable[0]] = splitVariable[1]
+			splitVariable := strings.SplitN(variable, "=", 2) // Split only on the first '='
+			key := strings.TrimSpace(splitVariable[0])
+			value := strings.TrimSpace(strings.Trim(splitVariable[1], "\"")) // Trim quotes from value
+			envMap[key] = value
 		}
 	}
 
-	if err := json.Unmarshal([]byte(configContent), conf); err != nil {
-		fmt.Println("Error unmarshalling config file: ", err)
-		os.Exit(1)
-	}
-
-	// Apply environment overrides (if any)
+	// Apply environment variables to config
 	for k, v := range envMap {
-		if strings.Contains(k, "host") {
+		switch k {
+		case "POSTGRES_HOST":
 			conf.Host = v
-		} else if strings.Contains(k, "port") {
+		case "POSTGRES_PORT":
 			conf.Port = v
-		} else if strings.Contains(k, "user") {
+		case "POSTGRES_USER":
 			conf.User = v
-		} else if strings.Contains(k, "password") {
+		case "POSTGRES_PASSWORD":
 			conf.Password = v
-		} else if strings.Contains(k, "database") {
+		case "POSTGRES_DB":
 			conf.Database = v
-		} else if strings.Contains(k, "redis_host") {
+		case "REDIS_HOST":
 			conf.RedisHost = v
-		} else if strings.Contains(k, "redis_password") {
+		case "REDIS_PASSWORD":
 			conf.RedisPassword = v
 		}
 	}
 
 	return conf
 }
-
-// Initialize the config based on environment variables (e.g., .env file or similar)
 
 func init() {
 	conf = GetConfig()

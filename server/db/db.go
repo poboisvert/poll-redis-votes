@@ -34,3 +34,7 @@ func Close() {
 		_ = dbInstance.Close()
 	}
 }
+
+func GetDB() *sql.DB {
+	return dbInstance
+}

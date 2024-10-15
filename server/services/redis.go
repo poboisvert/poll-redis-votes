@@ -43,7 +43,7 @@ func UpdateVoteCount(pollId int, optionIndex int) error {
 	}
 
 	// Increment the vote count for the specified option.
-	err = rdb.IncrBy(context.Background(), key, strconv.Itoa(optionIndex), 1).Err()
+	err = rdb.HIncrBy(context.Background(), key, strconv.Itoa(optionIndex), 1).Err()
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,11 @@ func GetVoteCount(pollId int) (map[int]int64, error) {
 	}
 
 	voteCount := make(map[int]int64)
-	for optionIndex, voteString := range votes {
+	for optionIndexString, voteString := range votes {
+		optionIndex, err := strconv.Atoi(optionIndexString)
+		if err != nil {
+			return nil, err
+		}
 		vote, err := strconv.ParseInt(voteString, 10, 64)
 		if err != nil {
 			return nil, err

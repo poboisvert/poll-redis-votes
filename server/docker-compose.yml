@@ -1,24 +1,51 @@
 version: "3.9"
 services:
-  db:
-    image: postgres:15
-    restart: always
+  redis:
+    container_name: redisapp
+    image: "redis/redis-stack"
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redisdata:/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  postgres:
+    container_name: postgresapp
+    image: "postgres:latest"
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: voting_app
-    ports:
-      - "5432:5432"
-  redis:
-    image: redis:7
-    restart: always
-    ports:
-      - "6379:6379"
-  voting-app:
-    build: .
-    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  sqlpad:
+    image: sqlpad/sqlpad:6
     depends_on:
-      - db
-      - redis
+      - postgres
+    hostname: "sqlpad"
     ports:
-      - "8080:8080"
+      - "3000:3000"
+    environment:
+      SQLPAD_ADMIN: "admin@admin.com"
+      SQLPAD_AUTH_DISABLED_DEFAULT_ROLE: "admin"
+      SQLPAD_AUTH_DISABLED: "true"
+      SQLPAD_APP_LOG_LEVEL: debug
+      SQLPAD_WEB_LOG_LEVEL: warn
+      SQLPAD_CONNECTIONS__psql__name: psql_conn
+      SQLPAD_CONNECTIONS__psql__driver: postgres
+      SQLPAD_CONNECTIONS__psql__host: postgres
+      SQLPAD_CONNECTIONS__psql__database: voting_app
+      SQLPAD_CONNECTIONS__psql__username: user
+      SQLPAD_CONNECTIONS__psql__password: password
+      SQLPAD_CONNECTIONS__psql__multiStatementTransactionEnabled: "true"
+      SQLPAD_CONNECTIONS__psql__idleTimeoutSeconds: 86400
+volumes:
+  postgres_data:

@@ -9,14 +9,14 @@ import (
 )
 
 func Vote(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	var vote models.Vote
 
 	if err := json.NewDecoder(r.Body).Decode(&vote); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-
-	// ... Handle potential logic to validate the vote ...
 
 	err := services.UpdateVoteCount(vote.PollID, vote.OptionIndex)
 	if err != nil {
