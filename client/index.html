@@ -9,6 +9,61 @@
 <body>
     <div class="container">
         <h1>Real-Time Voting</h1>
+
+        <button id="create-poll-button" style="margin: 30px 0;">Create Poll</button>
+        <div id="poll-form" style="display: none; margin: 30px 0;">
+            <h2>Create a New Poll</h2>
+            <form id="new-poll-form">
+                <label for="poll-question">Question:</label>
+                <input type="text" id="poll-question" required>
+                <label for="poll-options">Options (add one or more, press Enter to add):</label>
+                <input type="text" id="poll-option-input" placeholder="Type an option and press Enter" required>
+                <ul id="poll-options-list"></ul>
+                <button type="submit">Submit</button>
+                <button type="button" id="cancel-poll-button">Cancel</button>
+            </form>
+        </div>
+        
+        <script>
+            const pollOptionInput = document.getElementById("poll-option-input");
+            const pollOptionsList = document.getElementById("poll-options-list");
+
+            pollOptionInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    const optionValue = pollOptionInput.value.trim();
+                    if (optionValue) {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = optionValue;
+                        pollOptionsList.appendChild(listItem);
+                        pollOptionInput.value = ""; // Clear the input
+                    }
+                }
+            });
+        </script>
+        
+        <script>
+            document.getElementById("create-poll-button").addEventListener("click", function() {
+                document.getElementById("poll-form").style.display = "block";
+            });
+
+            document.getElementById("cancel-poll-button").addEventListener("click", function() {
+                document.getElementById("poll-form").style.display = "none";
+            });
+
+            document.getElementById("new-poll-form").addEventListener("submit", function(event) {
+                event.preventDefault();
+                const question = document.getElementById("poll-question").value;
+                const options = document.getElementById("poll-options").value.split(",").map(option => option.trim());
+
+                // Here you would typically send the data to the server
+                console.log("New Poll Created:", { question, options });
+
+                // Reset the form and hide it
+                document.getElementById("new-poll-form").reset();
+                document.getElementById("poll-form").style.display = "none";
+            });
+        </script>
         <div id="poll-list">
             </div>
     </div>

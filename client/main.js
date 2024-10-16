@@ -10,6 +10,49 @@ document.addEventListener("DOMContentLoaded", function () {
         handleVote(event.target);
       }
     });
+
+  // Event listener for the new poll form submission
+  document
+    .getElementById("new-poll-form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      const question = document.getElementById("poll-question").value;
+      const optionsList = document.getElementById("poll-options-list").children;
+      const options = Array.from(optionsList).map(
+        (option) => option.textContent
+      );
+      console.log("11", options);
+      const pollData = {
+        question: question,
+        options: options,
+        total_votes: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      fetch("http://localhost:8080/polls", {
+        method: "POST",
+        mode: "no-cors", // Fetch the resource with CORS disabled
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pollData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to create poll");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Poll created:", data);
+          loadPolls(); // Reload polls to include the new one
+          document.getElementById("new-poll-form").reset(); // Reset the form
+          document.getElementById("poll-form").style.display = "none"; // Hide the form
+        })
+        .catch((error) => console.error("Error creating poll: ", error));
+    });
 });
 
 function loadPolls() {
@@ -53,7 +96,7 @@ function getAllSockets(polls) {
           const pollElements = document.querySelectorAll(
             `div.option[data-poll-id="${data.poll_id}"]`
           );
-          console.log("111", pollElements);
+
           pollElements.forEach((pollElement) => {
             const voteCountElement = pollElement.querySelector(
               `.vote-count[data-poll-index="${data.optionIndex}"][data-poll-id="${data.poll_id}"]`

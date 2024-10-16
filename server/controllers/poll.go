@@ -14,6 +14,7 @@ var ErrPollNotFound = errors.New("poll not found") // Define the error
 
 func CreatePoll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Headers", "Authorization, content-type")
 
 	var poll models.Poll
 	if err := json.NewDecoder(r.Body).Decode(&poll); err != nil {
