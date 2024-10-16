@@ -34,16 +34,15 @@ func UpdateVoteCount(pollId int, optionIndex int) error {
 	// Check if the vote count key exists in Redis.
 	exists, err := rdb.Exists(context.Background(), key).Result()
 	if err != nil {
-		return err // Return the error instead of nil
+		// Create the key for the poll in Redis
+		rdb.HSet(context.Background(), key).Err()
+
 	}
 
 	// If the key does not exist, it means the poll does not exist, so we need to return an error.
 	if exists == 0 {
 		// Create the key for the poll in Redis
-		err := rdb.HSet(context.Background(), key).Err()
-		if err != nil {
-			return err // Return the error if key creation fails
-		}
+		rdb.HSet(context.Background(), key).Err()
 	}
 
 	// Increment the vote count for the specified option.

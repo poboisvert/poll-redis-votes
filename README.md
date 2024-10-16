@@ -27,3 +27,7 @@ This project is a Go application that allows users to create polls and submit vo
 "updated_at": "2023-10-01T12:00:00Z"
 }
 ```
+
+### Run
+
+- go run main.go

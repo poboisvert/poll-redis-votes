@@ -28,6 +28,7 @@ func Upgrade(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	pollID, err := strconv.Atoi(vars["pollID"])
+
 	if err != nil {
 		log.Println("Invalid poll ID:", vars["pollID"])
 		http.Error(w, "Invalid poll ID", http.StatusBadRequest)
@@ -43,6 +44,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	// Continuously send real-time updates with vote counts
+	log.Println("Valid poll ID:", pollID)
 	for {
 		voteCount, err := services.GetVoteCount(pollID) // Use GetVoteCount from the services package
 		if err != nil {
