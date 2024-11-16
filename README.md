@@ -40,6 +40,16 @@ This comprehensive tutorial guides you through building a real-time voting/polli
 
 - Run: docker compose up --build --wait
 
+- .env File
+
+```
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=voting_app
+```
+
 ### Run API
 
 - cd server && go run main.go
