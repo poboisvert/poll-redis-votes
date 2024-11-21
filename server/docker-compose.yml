@@ -1,5 +1,28 @@
 version: "3.9"
 services:
+  app:
+    container_name: voting_app
+    build: ./
+    volumes:
+      - ./config:/go/config
+      - ./controllers:/go/controllers
+      - ./db:/go/db
+      - ./models:/go/models
+      - ./router:/go/router
+      - ./services:/go/services
+      - ./utils:/go/utils
+      - ./main.go:/go/main.go # Changed from min.go to main.go
+    ports:
+      - 8080:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - voting_network
   redis:
     container_name: redisapp
     image: "redis/redis-stack"
@@ -7,6 +30,8 @@ services:
       - 6379:6379
     volumes:
       - ./redisdata:/data
+    networks:
+      - voting_network
     deploy:
       replicas: 1
       restart_policy:
@@ -26,6 +51,13 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - voting_network
   sqlpad:
     image: sqlpad/sqlpad:6
     depends_on:
@@ -47,5 +79,9 @@ services:
       SQLPAD_CONNECTIONS__psql__password: password
       SQLPAD_CONNECTIONS__psql__multiStatementTransactionEnabled: "true"
       SQLPAD_CONNECTIONS__psql__idleTimeoutSeconds: 86400
+    networks:
+      - voting_network
 volumes:
   postgres_data:
+networks:
+  voting_network:
